@@ -1,0 +1,16 @@
+name: build-and-push
+on: [push]
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2-beta
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - run: npm run build
+      - run: git add docs
+      - run: git config user.name "GitHub Actions Bot"
+      - run: git config user.email "<>"
+      - run: git commit -m publish
+      - run: git push origin main

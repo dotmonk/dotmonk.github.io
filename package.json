@@ -1,0 +1,19 @@
+{
+  "name": "dotmonk.github.io",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "build": "npm install && rm -rf docs && hq build src && mv dist docs && touch docs/.nojekyll docs/node_modules/.nojekyll"
+  },
+  "devDependencies": {
+    "@hqjs/hq": "0.0.31",
+    "@types/react": "^16.8.23",
+    "@types/react-dom": "^16.8.4"
+  },
+  "dependencies": {
+    "react": "^16.7.0",
+    "react-dom": "^16.8.6",
+    "css-nyx-theme": "https://github.com/JustZisGuy/css-nyx-theme.git#master",
+    "react-nyx-components": "https://github.com/JustZisGuy/react-nyx-components.git#master"
+  }
+}
