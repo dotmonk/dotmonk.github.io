@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import Main from "./Main";
+import { Router } from "./Router";
 
 import "css-nyx-theme/nyx.min.css";
 
@@ -11,6 +12,8 @@ main.style.height = "100%";
 const body = document.querySelector("body");
 body && body.appendChild(main);
 ReactDOM.render(
-    <Main />,
+    <Router>
+        <Main />
+    </Router>,
     main
 );

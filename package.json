@@ -3,7 +3,8 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build": "npm install && rm -rf docs && hq build src && mv dist docs && touch docs/.nojekyll docs/node_modules/.nojekyll"
+    "build": "npm install && rm -rf docs && hq build src && mv dist docs && touch docs/.nojekyll docs/node_modules/.nojekyll",
+    "dev": "npm install && hq src"
   },
   "devDependencies": {
     "@hqjs/hq": "0.0.31",
