@@ -1,0 +1,8 @@
+{
+  "imports": {
+    "css-nyx-theme/nyx.min.css": "./css-nyx-theme/nyx.min.css",
+    "react": "./react.js",
+    "react-dom": "./react-dom.js",
+    "react-nyx-components": "./react-nyx-components.js"
+  }
+}
