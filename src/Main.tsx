@@ -5,11 +5,12 @@ import { pushHash, RouterContext, RouterState } from "./Router";
 
 import Home from "./Home";
 import Toys from "./toys";
+import Notes from "./notes";
 
 type Props = {};
 
 class Main extends Component<Props> {
-  static pages = ["Home", "Toys"];
+  static pages = ["Home", "Toys", "Notes"];
 
   render() {
     // @ts-ignore
@@ -35,6 +36,7 @@ class Main extends Component<Props> {
       <div style={{ flexShrink: 1, flexGrow: 1 }}>
           <Home />
           <Toys />
+          <Notes />
       </div>
   </div>
 );
