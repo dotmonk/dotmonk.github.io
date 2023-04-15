@@ -30,11 +30,27 @@ class BrowserStudio extends Component<Props, State> {
     object: Object,
     depth: number = 0
   ): BrowserAttributeMap | undefined {
-    if (depth > 6 || Object.keys(object).length === 0) {
+    let objectAttributes = Object.keys(object);
+    if (depth > 6) {
+      return undefined;
+    }
+    if(objectAttributes.length === 0) {
+      const prototype = Object.getPrototypeOf(object);
+      // Browser crashes rather than present this info
+      //console.log(String(prototype));
+      if([
+        "[object OfflineResourceList]",
+        "[object Storage]"
+      ].includes(String(prototype))) {
+        return undefined;
+      }
+      //console.error(prototype);
+      objectAttributes = Object.keys(prototype);
+    }
+    if(objectAttributes.length === 0) {
       return undefined;
     }
     const map = {};
-    const objectAttributes = Object.keys(object);
     for (const attribute of objectAttributes) {
       const type =
         object === object[attribute] ? "self" : typeof object[attribute];
