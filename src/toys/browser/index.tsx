@@ -6,7 +6,6 @@ type Props = {};
 interface BrowserAttributeProperties {
   type: string;
   preview: string;
-  children?: BrowserAttributeMap;
 }
 
 interface BrowserAttributeMap {
@@ -28,10 +27,11 @@ class BrowserStudio extends Component<Props, State> {
 
   objectToMap(
     object: Object,
-    depth: number = 0
+    depth: number = 0,
+    prefix: string = ""
   ): BrowserAttributeMap | undefined {
     let objectAttributes = Object.keys(object);
-    if (depth > 6) {
+    if (depth > 20) {
       return undefined;
     }
     if(objectAttributes.length === 0) {
@@ -52,18 +52,23 @@ class BrowserStudio extends Component<Props, State> {
     }
     const map = {};
     for (const attribute of objectAttributes) {
-      const type =
+      if(attribute.length > 3 && prefix.indexOf(`.${attribute}`)>=0) {
+        continue
+      }
+      let type =
         object === object[attribute] ? "self" : typeof object[attribute];
       const preview = String(object[attribute]);
       const children =
         type === "object" && object[attribute] !== null
-          ? this.objectToMap(object[attribute], depth + 1)
+          ? this.objectToMap(object[attribute], depth + 1, prefix ? `${prefix}.${attribute}` : attribute)
           : undefined;
-      map[attribute] = {
+      map[prefix ? `${prefix}.${attribute}` : attribute] = {
         type,
-        preview,
-        children,
+        preview
       };
+      Object.keys(children || {}).forEach((childAttribute) => {
+        map[childAttribute] = (children || {})[childAttribute];
+      })
     }
     return map;
   }
@@ -78,12 +83,15 @@ class BrowserStudio extends Component<Props, State> {
     }
     return (
       <table id="report" style={{ border: "solid 1px var(--nyx-color-text)" }}>
+        <thead>
         <tr>
           <th>attribute</th>
           <th>typeof(attribute)</th>
           <th>preview</th>
         </tr>
-        {Object.keys(map)
+        </thead>
+        <tbody>
+          {Object.keys(map)
           .sort()
           .map((attribute, attributeIndex) => (
             <tr key={attributeIndex}>
@@ -95,12 +103,10 @@ class BrowserStudio extends Component<Props, State> {
               </td>
               <td style={{ borderTop: "solid 1px var(--nyx-color-text)" }}>
                 {map[attribute].preview}
-                {map[attribute].children
-                  ? this.generateTable(map[attribute].children || {})
-                  : ""}
               </td>
             </tr>
           ))}
+        </tbody>
       </table>
     );
   }
