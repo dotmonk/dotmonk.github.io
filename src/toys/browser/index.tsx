@@ -17,11 +17,9 @@ type State = {
 };
 
 class BrowserStudio extends Component<Props, State> {
-  audioContext: AudioContext;
 
   constructor(props: Props) {
     super(props);
-    this.audioContext = new AudioContext();
     this.state = {};
   }
 
