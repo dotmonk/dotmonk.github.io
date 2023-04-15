@@ -6,10 +6,9 @@ type RouteProps = {
   children: any;
 };
 
-type RouterState = {
-  pathname: string;
-  query?: { [key: string]: string };
-  hash?: { [key: string]: string } | string;
+export type RouterState = {
+  hashParams: { [key: string]: string };
+  hashPath: string;
 };
 
 export const RouterContext = React.createContext({});
@@ -27,9 +26,12 @@ export class Router extends React.Component<any, RouterState> {
   }
 
   parseStateLocation(): RouterState {
+    const hash = location.hash ? location.hash.substring(1) : "";
+    const hashParams = hash.indexOf("?")>=0 ? Object.fromEntries(new URLSearchParams(hash.split("?")[1]).entries()) : {};
+    const hashPath = hash.indexOf("?")>=0 ? hash.split("?")[0] : hash;
     return {
-      pathname: location.pathname,
-      hash: location.hash ? location.hash.substring(1) : ""
+      hashPath,
+      hashParams
     };
   }
 
@@ -69,7 +71,8 @@ export const pushHash = (hash: string) => {
 class Route extends React.Component<RouteProps> {
   render() {
     const { hashRegex, pathnameRegex, children } = this.props;
-    const routerState = this.context;
+    // @ts-ignore
+    const routerState: RouterState = this.context;
     const activeByPathname = pathnameRegex && location.pathname.match(pathnameRegex);
     const activeByHash = hashRegex && (
       location.hash ? location.hash.substring(1).match(hashRegex) : "".match(hashRegex)

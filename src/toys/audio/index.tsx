@@ -2,9 +2,11 @@ import React, { Component } from "react";
 import Route from "../../Router";
 import SynthButton from "./SynthButton";
 import { Navbar } from "react-nyx-components";
+
 type Props = {};
+type WaveformType = "sine" | "square" | "triangle" | "sawtooth";
 type State = {
-  waveform: "sine" | "square" | "triangle" | "sawtooth";
+  waveform: WaveformType;
 };
 
 // Frequencies borrowed from http://marcgg.com/blog/2016/11/01/javascript-audio/
@@ -21,9 +23,9 @@ class AudioStudio extends Component<Props, State> {
   render() {
     const { waveform } = this.state;
     return (
-      <Route hashRegex={/^\/Toys|\/Toys\/Audio/}>
+      <Route hashRegex={/^\/Toys\/Audio/}>
         <div>
-          <Navbar
+        <Navbar
             //@ts-ignore
             selected={waveform}
             values={["sine", "square", "triangle", "sawtooth"]}

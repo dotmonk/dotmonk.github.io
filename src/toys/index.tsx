@@ -2,29 +2,26 @@ import React, { Component } from "react";
 
 import { Navbar } from "react-nyx-components";
 
-import Route, { pushHash, RouterContext } from "../Router";
-import Audio from "./audio";
+import Route, { pushHash, RouterContext, RouterState } from "../Router";
+import AudioStudio from "./audio";
+import BrowserStudio from "./browser";
 
 type Props = {};
 
 class Toys extends Component<Props> {
-    static pages = [
-        "Audio"
-    ];
-    render() {
-        const routerState = this.context;
-        const pageMatch = routerState.hash.match(/^\/Toys\/([^/?#]+)/);
-        const pages = [
-            "Audio"
-        ];
-        let page;
-        if (pageMatch && pages.includes(pageMatch[1])) {
-            page = pageMatch[1];
-        } else {
-            page = "Audio";
-        }
-        return (
-            <Route hashRegex={/^\/Toys$|^\/Toys\//}>
+  static pages = ["Audio", "Browser"];
+  render() {
+    // @ts-ignore
+    const routerState: RouterState = this.context;
+    const pageMatch = routerState.hashPath.match(/^\/Toys\/([^/?#]+)/);
+    let page;
+    if (pageMatch && Toys.pages.includes(pageMatch[1])) {
+      page = pageMatch[1];
+    } else {
+      page = "Audio";
+    }
+    return (
+      <Route hashRegex={/^\/Toys$|^\/Toys\//}>
                 <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
                     <div
                         style={{ padding: "5px", flexShrink: 0, flexGrow: 0 }}
@@ -36,11 +33,13 @@ class Toys extends Component<Props> {
                         />
                     </div>
                     <div style={{ flexShrink: 1, flexGrow: 1 }}>
-                        <Audio />
+                        <AudioStudio />
+                        <BrowserStudio />
                     </div>
                 </div>
-            </Route>);
-    }
+      </Route>
+    );
+  }
 }
 
 Toys.contextType = RouterContext;
