@@ -16,11 +16,59 @@ type State = {
   data?: BrowserAttributeMap;
 };
 
-class BrowserStudio extends Component<Props, State> {
+const disabledAccessorPaths = [
+  "alert",
+  "close",
+  "confirm",
+  "document.location.assign",
+  "document.location.reload",
+  "document.location.replace",
+  "history.replaceState",
+  "history.pushState",
+  "history.forward",
+  "history.back",
+  "history.go",
+  "location.assign",
+  "location.reload",
+  "location.replace",
+  "open",
+  "prompt",
+  "print",
+];
 
+export interface ArgumentsResultMap {
+  [args: string]: any;
+}
+
+class BrowserStudio extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {};
+  }
+
+  generateArgumentsResultMap(accessorPath: string): ArgumentsResultMap {
+    const resultMap: ArgumentsResultMap = {};
+    const workingIdeaArguments = [
+      "()",
+      '("")',
+      //'("test")',
+      "(0)",
+      "(1)",
+      "(null)",
+      "(undefined)",
+      //"({})",
+      "(true)",
+      "(false)",
+      "([])",
+      "([1])",
+    ];
+    for (const args of workingIdeaArguments) {
+      try {
+        const result = eval(`${accessorPath}${args};`);
+        resultMap[args] = result;
+      } catch (_) {}
+    }
+    return resultMap;
   }
 
   objectToMap(
@@ -32,41 +80,60 @@ class BrowserStudio extends Component<Props, State> {
     if (depth > 20) {
       return undefined;
     }
-    if(objectAttributes.length === 0) {
+    if (objectAttributes.length === 0) {
       const prototype = Object.getPrototypeOf(object);
       // Browser crashes rather than present this info
       //console.log(String(prototype));
-      if([
-        "[object OfflineResourceList]",
-        "[object Storage]"
-      ].includes(String(prototype))) {
+      if (
+        ["[object OfflineResourceList]", "[object Storage]"].includes(
+          String(prototype)
+        )
+      ) {
         return undefined;
       }
       //console.error(prototype);
       objectAttributes = Object.keys(prototype);
     }
-    if(objectAttributes.length === 0) {
+    if (objectAttributes.length === 0) {
       return undefined;
     }
     const map = {};
     for (const attribute of objectAttributes) {
-      if(attribute.length > 3 && prefix.indexOf(`.${attribute}`)>=0) {
-        continue
+      if (attribute.length > 3 && prefix.indexOf(`.${attribute}`) >= 0) {
+        continue;
       }
       let type =
         object === object[attribute] ? "self" : typeof object[attribute];
       const preview = String(object[attribute]);
-      const children =
-        type === "object" && object[attribute] !== null
-          ? this.objectToMap(object[attribute], depth + 1, prefix ? `${prefix}.${attribute}` : attribute)
-          : undefined;
       map[prefix ? `${prefix}.${attribute}` : attribute] = {
         type,
-        preview
+        preview,
       };
-      Object.keys(children || {}).forEach((childAttribute) => {
-        map[childAttribute] = (children || {})[childAttribute];
-      })
+      const accessorPath = prefix ? `${prefix}.${attribute}` : attribute;
+      if (type === "object" && object[attribute] !== null) {
+        const children = this.objectToMap(
+          object[attribute],
+          depth + 1,
+          prefix ? `${prefix}.${attribute}` : attribute
+        );
+        Object.keys(children || {}).forEach((childAttribute) => {
+          map[childAttribute] = (children || {})[childAttribute];
+        });
+      } else if (
+        type === "function" &&
+        !disabledAccessorPaths.includes(accessorPath)
+      ) {
+        const resultArgumentsMap =
+          this.generateArgumentsResultMap(accessorPath);
+        for (const args in resultArgumentsMap) {
+          map[
+            prefix ? `${prefix}.${attribute}${args}` : `${attribute}${args}`
+          ] = {
+            type: "execution",
+            preview: String(resultArgumentsMap[args]),
+          };
+        }
+      }
     }
     return map;
   }
@@ -82,28 +149,28 @@ class BrowserStudio extends Component<Props, State> {
     return (
       <table id="report" style={{ border: "solid 1px var(--nyx-color-text)" }}>
         <thead>
-        <tr>
-          <th>attribute</th>
-          <th>typeof(attribute)</th>
-          <th>preview</th>
-        </tr>
+          <tr>
+            <th>attribute</th>
+            <th>typeof(attribute)</th>
+            <th>preview</th>
+          </tr>
         </thead>
         <tbody>
           {Object.keys(map)
-          .sort()
-          .map((attribute, attributeIndex) => (
-            <tr key={attributeIndex}>
-              <td style={{ borderTop: "solid 1px var(--nyx-color-text)" }}>
-                {attribute}
-              </td>
-              <td style={{ borderTop: "solid 1px var(--nyx-color-text)" }}>
-                {map[attribute].type}
-              </td>
-              <td style={{ borderTop: "solid 1px var(--nyx-color-text)" }}>
-                {map[attribute].preview}
-              </td>
-            </tr>
-          ))}
+            .sort()
+            .map((attribute, attributeIndex) => (
+              <tr key={attributeIndex}>
+                <td style={{ borderTop: "solid 1px var(--nyx-color-text)" }}>
+                  {attribute}
+                </td>
+                <td style={{ borderTop: "solid 1px var(--nyx-color-text)" }}>
+                  {map[attribute].type}
+                </td>
+                <td style={{ borderTop: "solid 1px var(--nyx-color-text)" }}>
+                  {map[attribute].preview}
+                </td>
+              </tr>
+            ))}
         </tbody>
       </table>
     );
